@@ -377,6 +377,12 @@ class BaseTrainer:
 
                 if self.args.val or final_epoch:
                     self.metrics, self.fitness = self.validate()
+
+                    # Check if accuracy meets the threshold
+                    if self.metrics['accuracy'] > 0.99:
+                        LOGGER.info(f"Accuracy threshold reached ({accuracy_threshold}). Stopping training.")
+                        break
+                
                 self.save_metrics(metrics={**self.label_loss_items(self.tloss), **self.metrics, **self.lr})
                 self.stop = self.stopper(epoch + 1, self.fitness)
 
