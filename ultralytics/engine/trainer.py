@@ -385,6 +385,14 @@ class BaseTrainer:
                 if self.args.save or (epoch + 1 == self.epochs):
                     self.save_model()
                     self.run_callbacks('on_model_save')
+        
+                # Early Stopping based on top-1 accuracy
+                if self.stop:
+                    break  # must break all DDP ranks
+                elif self.metrics.get('top1', 0) > 0.99:  # Adjust the threshold as needed
+                    LOGGER.info("Top-1 accuracy is above 0.99. Stopping training.")
+                    self.stop = True
+                    break
 
             tnow = time.time()
             self.epoch_time = tnow - self.epoch_time_start
